@@ -6,6 +6,13 @@ const PORT = process.env.PORT || 8000;
 let users = data;
 
 const server = http.createServer((req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   const baseUrl = `http://${req.headers.host}`;
   const parsedUrl = new URL(req.url, baseUrl);
 
