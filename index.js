@@ -103,10 +103,6 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({ error: "user not found" }));
     }
   }
-  if (parsedUrl.pathname === "/") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(users));
-  }
 });
 
 server.listen(PORT, () => {
