@@ -13,6 +13,12 @@ const server = http.createServer((req, res) => {
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
   const baseUrl = `http://${req.headers.host}`;
   const parsedUrl = new URL(req.url, baseUrl);
 
