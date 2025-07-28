@@ -2,7 +2,7 @@ import http from "http";
 import { URL } from "url";
 import { data } from "./data.js";
 
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 let users = data;
 
 const server = http.createServer((req, res) => {
