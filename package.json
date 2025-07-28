@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "description": "learning and practicing node js",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "author": "mehrab",
   "license": "MIT"

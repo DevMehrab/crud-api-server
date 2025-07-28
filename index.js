@@ -1,142 +1,110 @@
-export const data = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    age: 28,
-    isActive: true,
-    joinedDate: "2023-01-15",
-    address: {
-      street: "123 Main St",
-      city: "New York",
-      country: "USA",
-    },
-    interests: ["reading", "hiking", "photography"],
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    age: 34,
-    isActive: false,
-    joinedDate: "2022-11-03",
-    address: {
-      street: "456 Oak Ave",
-      city: "London",
-      country: "UK",
-    },
-    interests: ["cooking", "travel"],
-  },
-  {
-    id: 3,
-    name: "Robert Johnson",
-    email: "robert.j@example.com",
-    age: 22,
-    isActive: true,
-    joinedDate: "2023-05-20",
-    address: {
-      street: "789 Pine Rd",
-      city: "Sydney",
-      country: "Australia",
-    },
-    interests: ["gaming", "music"],
-  },
-  {
-    id: 4,
-    name: "Emily Wilson",
-    email: "emily.w@example.com",
-    age: 31,
-    isActive: true,
-    joinedDate: "2021-08-14",
-    address: {
-      street: "321 Elm Blvd",
-      city: "Toronto",
-      country: "Canada",
-    },
-    interests: ["yoga", "writing"],
-  },
-  {
-    id: 5,
-    name: "Michael Brown",
-    email: "michael.b@example.com",
-    age: 45,
-    isActive: false,
-    joinedDate: "2020-03-10",
-    address: {
-      street: "654 Maple Ln",
-      city: "Berlin",
-      country: "Germany",
-    },
-    interests: ["cycling", "photography"],
-  },
-  {
-    id: 6,
-    name: "Sarah Davis",
-    email: "sarah.d@example.com",
-    age: 29,
-    isActive: true,
-    joinedDate: "2023-02-28",
-    address: {
-      street: "987 Cedar St",
-      city: "Paris",
-      country: "France",
-    },
-    interests: ["art", "fashion"],
-  },
-  {
-    id: 7,
-    name: "David Miller",
-    email: "david.m@example.com",
-    age: 38,
-    isActive: true,
-    joinedDate: "2022-07-19",
-    address: {
-      street: "135 Birch Ave",
-      city: "Tokyo",
-      country: "Japan",
-    },
-    interests: ["technology", "reading"],
-  },
-  {
-    id: 8,
-    name: "Lisa Taylor",
-    email: "lisa.t@example.com",
-    age: 27,
-    isActive: false,
-    joinedDate: "2023-04-05",
-    address: {
-      street: "246 Willow Dr",
-      city: "Seoul",
-      country: "South Korea",
-    },
-    interests: ["movies", "dancing"],
-  },
-  {
-    id: 9,
-    name: "James Wilson",
-    email: "james.w@example.com",
-    age: 41,
-    isActive: true,
-    joinedDate: "2021-12-12",
-    address: {
-      street: "864 Spruce Ct",
-      city: "Mumbai",
-      country: "India",
-    },
-    interests: ["cricket", "travel"],
-  },
-  {
-    id: 10,
-    name: "Emma Anderson",
-    email: "emma.a@example.com",
-    age: 33,
-    isActive: true,
-    joinedDate: "2022-09-25",
-    address: {
-      street: "579 Aspen Way",
-      city: "São Paulo",
-      country: "Brazil",
-    },
-    interests: ["music", "cooking"],
-  },
-];
+import http from "http";
+import { URL } from "url";
+import { data } from "./data.js";
+
+const PORT = 8000;
+let users = data;
+
+const server = http.createServer((req, res) => {
+  const baseUrl = `http://${req.headers.host}`;
+  const parsedUrl = new URL(req.url, baseUrl);
+
+  // GET
+  if (req.method === "GET" && parsedUrl.pathname === "/") {
+    const id = parsedUrl.searchParams.get("id");
+    if (id) {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      let user = users.filter((u) => {
+        if (u.id === parseInt(id)) return u;
+      });
+      if (user.length === 0) {
+        res.end(JSON.stringify({ error: "user not found!" }));
+      } else {
+        res.end(JSON.stringify(user));
+      }
+    } else {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(users));
+    }
+  }
+
+  // POST
+  if (req.method === "POST" && parsedUrl.pathname === "/") {
+    let data = "";
+    req.on("data", (chunk) => {
+      data += chunk.toString();
+    });
+    req.on("end", () => {
+      if (data) {
+        let newUser = JSON.parse(data);
+        newUser.id = new Date().getTime();
+        users.push(newUser);
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "success", user: newUser }));
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "response body is empty" }));
+      }
+    });
+  }
+
+  // PUT
+  if (req.method === "PUT" && parsedUrl.pathname === "/") {
+    const id = parsedUrl.searchParams.get("id");
+    let data = "";
+    req.on("data", (chunk) => {
+      data += chunk.toString();
+    });
+    req.on("end", () => {
+      if (id) {
+        let user = users.filter((u) => {
+          if (u.id === parseInt(id)) return u;
+        });
+        if (user.length === 0) {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "user not found!" }));
+        } else {
+          if (data) {
+            let newData = JSON.parse(data);
+            const updatedUser = { ...user[0], ...newData };
+            users = users.map((el) => (el.id == id ? updatedUser : el));
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ status: "OK", user: updatedUser }));
+          } else {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "response body is empty" }));
+          }
+        }
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "user not found" }));
+      }
+    });
+  }
+
+  // DELETE
+  if (req.method === "DELETE" && parsedUrl.pathname === "/") {
+    const id = parsedUrl.searchParams.get("id");
+
+    if (id) {
+      let userExist = users.some((u) => u.id == id);
+      if (userExist) {
+        users = users.filter((u) => u.id != id);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({ status: "OK", message: "user deleted successfully" })
+        );
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "user not found" }));
+      }
+    } else {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "user not found" }));
+    }
+  }
+});
+
+server.listen(PORT, () => {
+  console.log(`server running at port: ${PORT}`);
+});
